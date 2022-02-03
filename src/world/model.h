@@ -2,10 +2,10 @@
 
 #include "resource.h"
 
+#include "DirectXMath.h"
 #include <filesystem>
 #include <linalg.h>
 #include <tiny_obj_loader.h>
-
 
 using namespace linalg::aliases;
 
@@ -25,7 +25,7 @@ namespace cg::world
 
 		std::vector<std::filesystem::path> get_per_shape_texture_files() const;
 
-		const float4x4 get_world_matrix() const;
+		const DirectX::XMMATRIX get_world_matrix() const;
 
 	protected:
 		tinyobj::attrib_t attrib;
