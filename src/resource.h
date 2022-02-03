@@ -29,65 +29,65 @@ namespace cg
 
 	private:
 		std::vector<T> data;
-		size_t item_size = sizeof(T);
-		size_t stride;
+		//size_t item_size = sizeof(T);
+		size_t stride{0};
 	};
 	template<typename T>
-	inline resource<T>::resource(size_t size)
+	inline resource<T>::resource(size_t size) : data(size)
 	{
-		THROW_ERROR("Not implemented yet");
+		//THROW_ERROR("Not implemented yet");
 	}
 	template<typename T>
-	inline resource<T>::resource(size_t x_size, size_t y_size)
+	inline resource<T>::resource(size_t x_size, size_t y_size) : data(x_size * y_size), stride(x_size)
 	{
-		THROW_ERROR("Not implemented yet");
+		//THROW_ERROR("Not implemented yet");
 	}
 	template<typename T>
 	inline resource<T>::~resource()
 	{
+		//THROW_ERROR("Not implemented yet");
 	}
 	template<typename T>
 	inline const T* resource<T>::get_data()
 	{
-		THROW_ERROR("Not implemented yet");
-		return nullptr;
+		return data.data();
 	}
 	template<typename T>
 	inline T& resource<T>::item(size_t item)
 	{
-		THROW_ERROR("Not implemented yet");
+		return data.at(item);
 	}
 	template<typename T>
 	inline T& resource<T>::item(size_t x, size_t y)
 	{
-		THROW_ERROR("Not implemented yet");
+		return data.at(y * stride + x);
 	}
 	template<typename T>
 	inline size_t resource<T>::get_size_in_bytes() const
 	{
-		THROW_ERROR("Not implemented yet");
+		return get_number_of_elements() * sizeof(T);
 	}
 	template<typename T>
 	inline size_t resource<T>::get_number_of_elements() const
 	{
-		THROW_ERROR("Not implemented yet");
+		return data.size();
 	}
 
 	template<typename T>
 	inline size_t resource<T>::get_stride() const
 	{
-		THROW_ERROR("Not implemented yet");
+		return stride;
 	}
 
 	struct color
 	{
 		static color from_float3(const float3& in)
 		{
-			THROW_ERROR("Not implemented yet");
+			return {in.x, in.y, in.z};
 		};
 		float3 to_float3() const
 		{
-			THROW_ERROR("Not implemented yet");
+			return {r, g, b};
 		}
 		float r;
 		float g;
@@ -98,15 +98,26 @@ namespace cg
 	{
 		static unsigned_color from_color(const color& color)
 		{
-			THROW_ERROR("Not implemented yet");
+			return {
+					static_cast<unsigned char>(255.0f * std::clamp(color.r, 0.0f, 1.0f)),
+					static_cast<unsigned char>(255.0f * std::clamp(color.g, 0.0f, 1.0f)),
+					static_cast<unsigned char>(255.0f * std::clamp(color.b, 0.0f, 1.0f)),
+			};
 		};
 		static unsigned_color from_float3(const float3& color)
 		{
-			THROW_ERROR("Not implemented yet");
+			return {
+					static_cast<unsigned char>(255.0f * std::clamp(color.x, 0.0f, 1.0f)),
+					static_cast<unsigned char>(255.0f * std::clamp(color.y, 0.0f, 1.0f)),
+					static_cast<unsigned char>(255.0f * std::clamp(color.z, 0.0f, 1.0f)),
+			};
 		}
 		float3 to_float3() const
 		{
-			THROW_ERROR("Not implemented yet");
+			return {
+					static_cast<float>(r) / 255.0f,
+					static_cast<float>(g) / 255.0f,
+					static_cast<float>(b) / 255.0f};
 		};
 		unsigned char r;
 		unsigned char g;
@@ -138,6 +149,32 @@ namespace cg
 
 		float u;
 		float v;
+
+		vertex operator+(const vertex& other) const
+		{
+			vertex result{};
+			result.x = this->x + other.x;
+			result.y = this->y + other.y;
+			result.z = this->z + other.z;
+			result.nx = this->nx + other.nx;
+			result.ny = this->ny + other.ny;
+			result.nz = this->nz + other.nz;
+
+			return result;
+		}
+
+		vertex operator*(const float value) const
+		{
+			vertex result;
+			result.x = this->x * value;
+			result.y = this->y * value;
+			result.z = this->z * value;
+			result.nx = this->nx * value;
+			result.ny = this->ny * value;
+			result.nz = this->nz * value;
+
+			return result;
+		}
 	};
 
 }// namespace cg

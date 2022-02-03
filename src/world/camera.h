@@ -1,9 +1,7 @@
 #pragma once
 
-#include <linalg.h>
-#ifdef DX12
 #include <DirectXMath.h>
-#endif
+#include <linalg.h>
 
 
 using namespace linalg::aliases;
@@ -26,17 +24,17 @@ namespace cg::world
 		void set_z_near(float in_z_near);
 		void set_z_far(float in_z_far);
 
-		const float4x4 get_view_matrix() const;
-		const float4x4 get_projection_matrix() const;
+		const DirectX::XMMATRIX get_view_matrix() const;
+		const DirectX::XMMATRIX get_projection_matrix() const;
 
 #ifdef DX12
 		const DirectX::XMMATRIX get_dxm_view_matrix() const;
 		const DirectX::XMMATRIX get_dxm_projection_matrix() const;
 #endif
-		const float3 get_position() const;
-		const float3 get_direction() const;
-		const float3 get_right() const;
-		const float3 get_up() const;
+		const DirectX::XMVECTOR get_position() const;
+		const DirectX::XMVECTOR get_direction() const;
+		const DirectX::XMVECTOR get_right() const;
+		const DirectX::XMVECTOR get_up() const;
 		const float get_theta() const;
 		const float get_phi() const;
 
