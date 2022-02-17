@@ -101,6 +101,7 @@ namespace cg::renderer
 	inline void rasterizer<VB, RT>::draw(size_t num_indices)
 	{
 		for (size_t face_idx = 0; face_idx != num_indices / 3; ++face_idx) {
+
 			std::array<vertex, 3> face{};
 			for (size_t i = 0; i != 3; ++i) {
 				face[i] = vertex_buffer->item(index_buffer->item(3 * face_idx + i));
@@ -109,25 +110,17 @@ namespace cg::renderer
 			std::array<float3, 3> vertices;
 			for (size_t i = 0; i != 3; ++i) {
 				face[i] = vertex_shader(face[i]);
-				vertices[i].x = face[i].x;
-				vertices[i].y = face[i].y;
-				vertices[i].z = face[i].z;
+				vertices[i] = float3(&face[i].position.x);
 			}
 
 			float ymin = std::min_element(vertices.begin(), vertices.end(), [](float3 a, float3 b) { return a.y < b.y; })->y;
 			float ymax = std::max_element(vertices.begin(), vertices.end(), [](float3 a, float3 b) { return a.y < b.y; })->y;
-
-			ymin = (ymin + 1) / 2 * (height - 1);
-			ymax = (ymax + 1) / 2 * (height - 1);
 
 			int yfrom = (std::clamp(static_cast<int>(std::ceil(ymin)), 0, static_cast<int>(height - 1)));
 			int yto = (std::clamp(static_cast<int>(std::ceil(ymax)), 0, static_cast<int>(height - 1)));
 
 			float xmin = std::min_element(vertices.begin(), vertices.end(), [](float3 a, float3 b) { return a.x < b.x; })->x;
 			float xmax = std::max_element(vertices.begin(), vertices.end(), [](float3 a, float3 b) { return a.x < b.x; })->x;
-
-			xmin = (xmin + 1) / 2 * (width - 1);
-			xmax = (xmax + 1) / 2 * (width - 1);
 
 			int xfrom = (std::clamp(static_cast<int>(std::ceil(xmin)), 0, static_cast<int>(width - 1)));
 			int xto = (std::clamp(static_cast<int>(std::ceil(xmax)), 0, static_cast<int>(width - 1)));
@@ -136,8 +129,9 @@ namespace cg::renderer
 
 			for (int y = yfrom; y < yto; ++y) {
 				for (int x = xfrom; x < xto; ++x) {
-					float xf = static_cast<float>(x) / (width - 1) * 2 - 1;
-					float yf = static_cast<float>(y) / (height - 1) * 2 - 1;
+
+					float xf = static_cast<float>(x);
+					float yf = static_cast<float>(y);
 					float3 current_point{static_cast<float>(xf), static_cast<float>(yf), 0.0f};
 
 					float u = abs(cross(vertices[1] - current_point, vertices[2] - current_point).z) / area_twice;
@@ -157,9 +151,9 @@ namespace cg::renderer
 						continue;
 					}
 
-					if (depth_test(pixel_data.z, x, y)) {
+					if (depth_test(pixel_data.position.z, x, y)) {
 						float& depth = depth_buffer->item(x, y);
-						depth = pixel_data.z;
+						depth = pixel_data.position.z;
 
 						color pixel_value = pixel_shader(pixel_data, u * u + v * v + w * w, depth);
 						render_target->item(x, y) = unsigned_color::from_color(pixel_value);
@@ -179,7 +173,7 @@ namespace cg::renderer
 	template<typename VB, typename RT>
 	inline bool rasterizer<VB, RT>::depth_test(float z, size_t x, size_t y)
 	{
-		return z > depth_buffer->item(x, y);
+		return z < depth_buffer->item(x, y);
 	}
 
 }// namespace cg::renderer

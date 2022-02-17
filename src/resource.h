@@ -2,6 +2,7 @@
 
 #include "utils/error_handler.h"
 
+#include "DirectXMath.h"
 #include <algorithm>
 #include <linalg.h>
 #include <vector>
@@ -29,13 +30,11 @@ namespace cg
 
 	private:
 		std::vector<T> data;
-		//size_t item_size = sizeof(T);
 		size_t stride{0};
 	};
 	template<typename T>
 	inline resource<T>::resource(size_t size) : data(size)
 	{
-		//THROW_ERROR("Not implemented yet");
 	}
 	template<typename T>
 	inline resource<T>::resource(size_t x_size, size_t y_size) : data(x_size * y_size), stride(x_size)
@@ -85,6 +84,12 @@ namespace cg
 		{
 			return {in.x, in.y, in.z};
 		};
+
+		static color from_XMFLOAT3(const DirectX::XMFLOAT3& in)
+		{
+			return {in.x, in.y, in.z};
+		}
+
 		float3 to_float3() const
 		{
 			return {r, g, b};
@@ -112,6 +117,12 @@ namespace cg
 					static_cast<unsigned char>(255.0f * std::clamp(color.z, 0.0f, 1.0f)),
 			};
 		}
+		static unsigned_color from_xmvector(const DirectX::FXMVECTOR color)
+		{
+			DirectX::XMFLOAT3 temp;
+			DirectX::XMStoreFloat3(&temp, color);
+			return from_color(color::from_XMFLOAT3(temp));
+		}
 		float3 to_float3() const
 		{
 			return {
@@ -119,6 +130,11 @@ namespace cg
 					static_cast<float>(g) / 255.0f,
 					static_cast<float>(b) / 255.0f};
 		};
+		DirectX::XMVECTOR to_xmvector() const
+		{
+			DirectX::XMFLOAT3 f(&this->to_float3()[0]);
+			return DirectX::XMLoadFloat3(&f);
+		}
 		unsigned char r;
 		unsigned char g;
 		unsigned char b;
@@ -127,51 +143,77 @@ namespace cg
 
 	struct vertex
 	{
-		float x;
-		float y;
-		float z;
+		DirectX::XMFLOAT3 position;
+		DirectX::XMFLOAT3 normal;
 
-		float nx;
-		float ny;
-		float nz;
+		DirectX::XMFLOAT3 ambient;
+		DirectX::XMFLOAT3 diffuse;
+		DirectX::XMFLOAT3 specular;
 
-		float ambient_r;
-		float ambient_g;
-		float ambient_b;
+		DirectX::XMFLOAT3 emissive;
 
-		float diffuse_r;
-		float diffuse_g;
-		float diffuse_b;
+		float shininess;
 
-		float emissive_r;
-		float emissive_g;
-		float emissive_b;
-
-		float u;
-		float v;
+		DirectX::XMFLOAT2 uv;
 
 		vertex operator+(const vertex& other) const
 		{
-			vertex result{};
-			result.x = this->x + other.x;
-			result.y = this->y + other.y;
-			result.z = this->z + other.z;
-			result.nx = this->nx + other.nx;
-			result.ny = this->ny + other.ny;
-			result.nz = this->nz + other.nz;
+			using namespace DirectX;
+
+			vertex result;
+			XMVECTOR converter = XMVectorAdd(XMLoadFloat3(&position), XMLoadFloat3(&other.position));
+			XMStoreFloat3(&result.position, converter);
+
+			converter = XMVectorAdd(XMLoadFloat3(&normal), XMLoadFloat3(&other.normal));
+			XMStoreFloat3(&result.normal, converter);
+
+			converter = XMVectorAdd(XMLoadFloat3(&ambient), XMLoadFloat3(&other.ambient));
+			XMStoreFloat3(&result.ambient, converter);
+
+			converter = XMVectorAdd(XMLoadFloat3(&diffuse), XMLoadFloat3(&other.diffuse));
+			XMStoreFloat3(&result.diffuse, converter);
+
+			converter = XMVectorAdd(XMLoadFloat3(&specular), XMLoadFloat3(&other.specular));
+			XMStoreFloat3(&result.specular, converter);
+
+			converter = XMVectorAdd(XMLoadFloat3(&emissive), XMLoadFloat3(&other.emissive));
+			XMStoreFloat3(&result.emissive, converter);
+
+			result.shininess = shininess + other.shininess;
+
+			converter = XMVectorAdd(XMLoadFloat2(&uv), XMLoadFloat2(&other.uv));
+			XMStoreFloat2(&result.uv, converter);
 
 			return result;
 		}
 
 		vertex operator*(const float value) const
 		{
+			using namespace DirectX;
+
 			vertex result;
-			result.x = this->x * value;
-			result.y = this->y * value;
-			result.z = this->z * value;
-			result.nx = this->nx * value;
-			result.ny = this->ny * value;
-			result.nz = this->nz * value;
+			XMVECTOR converter = XMVectorScale(XMLoadFloat3(&position), value);
+			XMStoreFloat3(&result.position, converter);
+
+			converter = XMVectorScale(XMLoadFloat3(&normal), value);
+			XMStoreFloat3(&result.normal, converter);
+
+			converter = XMVectorScale(XMLoadFloat3(&ambient), value);
+			XMStoreFloat3(&result.ambient, converter);
+
+			converter = XMVectorScale(XMLoadFloat3(&diffuse), value);
+			XMStoreFloat3(&result.diffuse, converter);
+
+			converter = XMVectorScale(XMLoadFloat3(&specular), value);
+			XMStoreFloat3(&result.specular, converter);
+
+			converter = XMVectorScale(XMLoadFloat3(&emissive), value);
+			XMStoreFloat3(&result.emissive, converter);
+
+			result.shininess = shininess * value;
+
+			converter = XMVectorScale(XMLoadFloat2(&uv), value);
+			XMStoreFloat2(&result.uv, converter);
 
 			return result;
 		}

@@ -37,22 +37,22 @@ void cg::renderer::rasterization_renderer::init()
 		const DirectX::XMMATRIX view = (camera->get_view_matrix());
 		const DirectX::XMMATRIX projection = (camera->get_projection_matrix());
 
-		DirectX::XMVECTOR address = DirectX::XMVectorSet(vertex_data.x, vertex_data.y, vertex_data.z, 1.0f);
+		DirectX::XMVECTOR address = DirectX::XMLoadFloat3(&vertex_data.position);
 
-		const DirectX::XMMATRIX world_view_projection = XMMatrixMultiply(XMMatrixMultiply(world, view), projection);
-		address = DirectX::XMVector4Transform(address, world_view_projection);
+		address = DirectX::XMVector3Project(address, 0.0f, 0.0f,
+											static_cast<float>(settings->width),
+											static_cast<float>(settings->height),
+											settings->camera_z_near,
+											settings->camera_z_far,
+											projection, view, world);
 
-		vertex_data.x = address.m128_f32[0] / address.m128_f32[3];
-		vertex_data.y = address.m128_f32[1] / address.m128_f32[3];
-		vertex_data.z = address.m128_f32[2] / address.m128_f32[3];
-
+		DirectX::XMStoreFloat3(&vertex_data.position, address);
 		return vertex_data;
 	};
 
 	rasterizer->pixel_shader = [this](vertex vertex_data, const float b, const float z) {
 		const float distance = 0.25f + 0.75f * 5000 * z;
-		const float intensity = (1 - b) * distance;
-
+		const float intensity = (1 - b);
 		return color::from_float3(float3{intensity, intensity, intensity});
 	};
 }
@@ -63,7 +63,7 @@ void cg::renderer::rasterization_renderer::update() {}
 
 void cg::renderer::rasterization_renderer::render()
 {
-	rasterizer->clear_render_target(FLT_MIN);
+	rasterizer->clear_render_target(FLT_MAX);
 
 	auto& vertex_buffers = model->get_vertex_buffers();
 	auto& index_buffers = model->get_index_buffers();

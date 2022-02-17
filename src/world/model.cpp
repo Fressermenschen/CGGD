@@ -21,10 +21,12 @@ cg::world::model::~model() {}
 void cg::world::model::load_obj(const std::filesystem::path& model_path)
 {
 	std::string error_message, warning_message;
+	std::filesystem::path dir = model_path;
+	dir.remove_filename();
 	const bool status = LoadObj(&attrib, &shapes, &materials,
 								&warning_message, &error_message,
 								model_path.generic_string().c_str(),
-								nullptr, true);
+								dir.generic_string().c_str(), true);
 
 	if (warning_message.size()) {
 		std::cerr << "Warning: " << warning_message << std::endl;
@@ -36,11 +38,10 @@ void cg::world::model::load_obj(const std::filesystem::path& model_path)
 
 	const size_t num_vertices = attrib.vertices.size() / 3;
 	std::vector<vertex> vertices(num_vertices);
-	for (size_t i = 0; i != num_vertices; ++i) {
+	for (size_t i = 0; i != num_vertices; ++i)
+	{
 		vertex& current_vertex = vertices[i];
-		current_vertex.x = attrib.vertices.at(3 * i + 0);
-		current_vertex.y = attrib.vertices.at(3 * i + 1);
-		current_vertex.z = attrib.vertices.at(3 * i + 2);
+		current_vertex.position = DirectX::XMFLOAT3(&attrib.vertices.at(3 * i));
 	}
 
 	for (auto& [name, mesh, lines, points]: shapes) {
@@ -51,6 +52,14 @@ void cg::world::model::load_obj(const std::filesystem::path& model_path)
 			if (index_map.count(index) == 0) {
 				const unsigned int local_index = static_cast<unsigned int>(vertex_accumulator.size());
 				vertex_accumulator.push_back(vertices[index]);
+
+				vertex_accumulator.back().diffuse = DirectX::XMFLOAT3(materials[mesh.material_ids[i / 3]].diffuse);
+				vertex_accumulator.back().ambient = DirectX::XMFLOAT3(materials[mesh.material_ids[i / 3]].ambient);
+				vertex_accumulator.back().specular = DirectX::XMFLOAT3(materials[mesh.material_ids[i / 3]].specular);
+				vertex_accumulator.back().emissive = DirectX::XMFLOAT3(materials[mesh.material_ids[i / 3]].emission);
+
+				vertex_accumulator.back().shininess = materials[mesh.material_ids[i / 3]].shininess;
+
 				index_map[index] = local_index;
 			}
 		}
@@ -87,7 +96,7 @@ cg::world::model::get_index_buffers() const
 std::vector<std::filesystem::path>
 cg::world::model::get_per_shape_texture_files() const
 {
-	//THROW_ERROR("Not implemented yet");
+	THROW_ERROR("Not implemented yet");
 }
 
 
