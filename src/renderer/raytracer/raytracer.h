@@ -34,10 +34,7 @@ namespace DirectX
 		XMVECTOR pv1 = XMVectorSubtract(v1, p);
 		XMVECTOR pv2 = XMVectorSubtract(v2, p);
 
-		XMVECTOR result = XMVectorSet(XMVectorGetX(XMVectorDivide(XMTriangleAreaTwice(pv1, pv2), area)),
-									  XMVectorGetX(XMVectorDivide(XMTriangleAreaTwice(pv0, pv2), area)),
-									  XMVectorGetX(XMVectorDivide(XMTriangleAreaTwice(pv0, pv1), area)),
-									  0.0f);
+		XMVECTOR result = XMVectorSet(XMVectorGetX(XMVectorDivide(XMTriangleAreaTwice(pv1, pv2), area)), XMVectorGetX(XMVectorDivide(XMTriangleAreaTwice(pv0, pv2), area)), XMVectorGetX(XMVectorDivide(XMTriangleAreaTwice(pv0, pv1), area)), 0.0f);
 		return result;
 	}
 
@@ -51,10 +48,9 @@ namespace cg::renderer
 {
 	struct ray
 	{
-		ray(DirectX::FXMVECTOR pos, DirectX::FXMVECTOR dir) : position(pos),
-															  direction(DirectX::XMVector3Normalize(dir))
+		ray(DirectX::FXMVECTOR pos, DirectX::FXMVECTOR dir) : position(pos), direction(DirectX::XMVector3Normalize(dir))
 		{
-			//removing these brackets breakes next XMVECTOR
+			//Required Comment
 		}
 
 		DirectX::XMVECTOR position;
@@ -79,7 +75,6 @@ namespace cg::renderer
 		DirectX::XMVECTOR duffuse;
 		DirectX::XMVECTOR ambient;
 	};
-
 
 	template<typename VB, typename RT>
 	class raytracer
@@ -146,9 +141,7 @@ namespace cg::renderer
 			{
 				for (size_t x = 0; x != width; ++x)
 				{
-					render_target->item(x, y) = unsigned_color::from_float3({static_cast<float>(x) / width,
-																			 static_cast<float>(y) / height,
-																			 1.0});
+					render_target->item(x, y) = unsigned_color::from_float3({static_cast<float>(x) / width, static_cast<float>(y) / height, 1.0});
 				}
 			}
 		}
@@ -176,10 +169,7 @@ namespace cg::renderer
 		for (std::shared_ptr<resource<VB>>& vb: vertex_buffers)
 		{
 			acceleration_structures.emplace_back();
-			BoundingBox::CreateFromPoints(acceleration_structures.back(),
-										  vb->get_number_of_elements(),
-										  &vb->item(0).position,
-										  sizeof(VB));
+			BoundingBox::CreateFromPoints(acceleration_structures.back(), vb->get_number_of_elements(), &vb->item(0).position, sizeof(VB));
 		}
 	}
 
@@ -221,13 +211,7 @@ namespace cg::renderer
 				const float fx = static_cast<float>(x);
 				const float fy = static_cast<float>(y);
 				const XMVECTOR pixel = XMVectorSet(fx, fy, 1.0f, 0.0f);
-
-				XMVECTOR pixelDir = XMVector3Normalize(XMVector3Unproject(pixel,
-																			 0.0f, 0.0f, w, h,
-																			 0.0f, 1.0f,
-																			 projection,
-																			 view,
-																			 XMMatrixIdentity()));
+				XMVECTOR pixelDir = XMVector3Normalize(XMVector3Unproject(pixel, 0.0f, 0.0f, w, h, 0.0f, 1.0f, projection, view, XMMatrixIdentity()));
 				ray r(eye, pixelDir);
 
 				payload p;
@@ -304,8 +288,7 @@ namespace cg::renderer
 						}
 
 						const XMVECTOR hitPoint = XMVectorAdd(ray.position, XMVectorScale(ray.direction, t));
-						const XMVECTOR barycentric = XMFindBarycentric(hitPoint, triangle.at(0), triangle.at(1),
-																	   triangle.at(2));
+						const XMVECTOR barycentric = XMFindBarycentric(hitPoint, triangle.at(0), triangle.at(1), triangle.at(2));
 
 						assert(std::abs(XMVectorGetX(XMVectorSum(barycentric)) - 1.0f) < 0.001f);
 
@@ -331,7 +314,6 @@ namespace cg::renderer
 	template<typename VB, typename RT>
 	DirectX::XMVECTOR raytracer<VB, RT>::hit_shader(const payload& p, const ray& camera_ray) const
 	{
-
 		using namespace DirectX;
 
 		constexpr bool USE_BLINN_LIGHTING = false;
@@ -340,11 +322,7 @@ namespace cg::renderer
 		constexpr bool USE_SPECULAR = true;
 
 		const std::vector<light> lights =
-				{
-						{XMVectorSet(0.0f, 1.925f, 0.0f, 1.0f),
-						 XMVectorSet(0.25f, 0.25f, 0.25f, 1.0f),
-						 XMVectorSet(0.75f, 0.75f, 0.75f, 1.0f),
-						 XMVectorSet(0.4f, 0.4f, 0.4f, 1.0f)}};
+				{{XMVectorSet(0.0f, 1.925f, 0.0f, 1.0f), XMVectorSet(0.25f, 0.25f, 0.25f, 1.0f), XMVectorSet(0.75f, 0.75f, 0.75f, 1.0f), XMVectorSet(0.4f, 0.4f, 0.4f, 1.0f)}};
 
 		XMVECTOR output = XMVectorZero();
 		for (const light& l: lights)
@@ -418,7 +396,7 @@ namespace cg::renderer
 	DirectX::XMVECTOR raytracer<VB, RT>::miss_shader(const payload& p, const ray& camera_ray) const
 	{
 		DirectX::XMVECTOR output = DirectX::XMVectorZero();
-		
+
 		return output;
 	}
 

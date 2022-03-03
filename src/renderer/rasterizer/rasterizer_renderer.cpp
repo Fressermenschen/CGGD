@@ -14,18 +14,18 @@ void cg::renderer::rasterization_renderer::init()
 	rasterizer->set_render_target(render_target, depth_buffer);
 	rasterizer->set_viewport(get_width(), get_height());
 
-	const float3 camera_position{
+	const DirectX::XMFLOAT3 camera_position{
 			settings->camera_position[0],
 			settings->camera_position[1],
 			settings->camera_position[2]};
 
 	camera = std::make_shared<cg::world::camera>();
-	camera->set_position(camera_position);
+	camera->set_position(DirectX::XMLoadFloat3(&camera_position));
 	camera->set_angle_of_view(settings->camera_angle_of_view);
 	camera->set_height(static_cast<float>(settings->height));
 	camera->set_width(static_cast<float>(settings->width));
-	camera->set_theta(settings->camera_theta);
-	camera->set_phi(settings->camera_phi);
+	camera->set_theta(settings->camera_phi);
+	camera->set_phi(settings->camera_theta);
 	camera->set_z_near(settings->camera_z_near);
 	camera->set_z_far(settings->camera_z_far);
 
@@ -76,6 +76,5 @@ void cg::renderer::rasterization_renderer::render()
 
 		rasterizer->draw(index_buffers[i]->get_number_of_elements());
 	}
-
 	utils::save_resource(*render_target, settings->result_path);
 }

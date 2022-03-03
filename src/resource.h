@@ -35,6 +35,7 @@ namespace cg
 	template<typename T>
 	inline resource<T>::resource(size_t size) : data(size)
 	{
+		//THROW_ERROR("Not implemented yet");
 	}
 	template<typename T>
 	inline resource<T>::resource(size_t x_size, size_t y_size) : data(x_size * y_size), stride(x_size)
@@ -44,7 +45,6 @@ namespace cg
 	template<typename T>
 	inline resource<T>::~resource()
 	{
-		//THROW_ERROR("Not implemented yet");
 	}
 	template<typename T>
 	inline const T* resource<T>::get_data()
@@ -140,6 +140,15 @@ namespace cg
 		unsigned char b;
 	};
 
+	struct d3d_vertex
+	{
+		DirectX::XMFLOAT4 position;
+		DirectX::XMFLOAT4 normal;
+		DirectX::XMFLOAT4 ambient;
+		DirectX::XMFLOAT4 diffuse;
+		DirectX::XMFLOAT4 emissive;
+		DirectX::XMFLOAT3 bary;
+	};
 
 	struct vertex
 	{

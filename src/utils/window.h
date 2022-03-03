@@ -9,6 +9,8 @@ namespace cg::utils
 	class window
 	{
 	public:
+		static HWND hwnd;
+
 		static int run(cg::renderer::renderer* renderer, HINSTANCE hinstance, int ncmdshow);
 		static HWND get_hwnd()
 		{
@@ -19,6 +21,5 @@ namespace cg::utils
 		static LRESULT CALLBACK window_proc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 
 	private:
-		static HWND hwnd;
 	};
 }// namespace cg::utils

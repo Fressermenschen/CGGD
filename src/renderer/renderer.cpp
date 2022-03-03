@@ -56,27 +56,43 @@ std::shared_ptr<renderer> cg::renderer::make_renderer(std::shared_ptr<cg::settin
 
 void cg::renderer::renderer::move_forward(float delta)
 {
-	//camera->set_position(camera->get_position() + camera->get_direction() * delta);
+	DirectX::XMVECTOR forward = DirectX::XMVectorScale(camera->get_direction(), delta);
+	camera->set_position(DirectX::XMVectorAdd(camera->get_position(), forward));
 }
 
 void cg::renderer::renderer::move_backward(float delta)
 {
-	//camera->set_position(camera->get_position() - camera->get_direction() * delta);
+	DirectX::XMVECTOR forward = DirectX::XMVectorScale(camera->get_direction(), delta);
+	camera->set_position(DirectX::XMVectorSubtract(camera->get_position(), forward));
 }
 
 void cg::renderer::renderer::move_left(float delta)
 {
-	//camera->set_position(camera->get_position() - camera->get_right() * delta);
+	DirectX::XMVECTOR right = DirectX::XMVectorScale(camera->get_right(), delta);
+	camera->set_position(DirectX::XMVectorSubtract(camera->get_position(), right));
 }
 
 void cg::renderer::renderer::move_right(float delta)
 {
-	//camera->set_position(camera->get_position() + camera->get_right() * delta);
+	DirectX::XMVECTOR right = DirectX::XMVectorScale(camera->get_right(), delta);
+	camera->set_position(DirectX::XMVectorAdd(camera->get_position(), right));
+}
+
+void cg::renderer::renderer::move_up(float delta)
+{
+	DirectX::XMVECTOR up = DirectX::XMVectorScale(camera->get_up(), delta);
+	camera->set_position(DirectX::XMVectorAdd(camera->get_position(), up));
+}
+
+void cg::renderer::renderer::move_down(float delta)
+{
+	DirectX::XMVECTOR up = DirectX::XMVectorScale(camera->get_right(), delta);
+	camera->set_position(DirectX::XMVectorSubtract(camera->get_position(), up));
 }
 
 void cg::renderer::renderer::move_yaw(float delta)
 {
-	//camera->set_theta(camera->get_theta() + delta);
+	camera->set_theta(camera->get_theta() + delta);
 }
 
 void cg::renderer::renderer::move_pitch(float delta)

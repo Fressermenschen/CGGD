@@ -14,7 +14,7 @@ namespace cg::world
 		camera();
 		virtual ~camera();
 
-		void set_position(float3 in_position);
+		void set_position(DirectX::FXMVECTOR in_position);
 		void set_theta(float in_theta);
 		void set_phi(float in_phi);
 
@@ -37,9 +37,11 @@ namespace cg::world
 		const DirectX::XMVECTOR get_up() const;
 		const float get_theta() const;
 		const float get_phi() const;
+		const float get_z_near() const;
+		const float get_z_far() const;
 
 	protected:
-		float3 position;
+		DirectX::XMVECTOR position;
 		float theta;
 		float phi;
 
